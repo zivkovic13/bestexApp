@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     enum Screen {
@@ -6,6 +7,9 @@ struct ContentView: View {
     }
 
     @State private var currentScreen: Screen = .home
+
+    @Environment(\.modelContext) private var context
+    @Query private var localGirls: [Girl]  // load SwiftData girls
 
     var body: some View {
         switch currentScreen {
@@ -18,14 +22,32 @@ struct ContentView: View {
                     withAnimation { currentScreen = .leaderboard }
                 }
             )
+            .onAppear {
+                if localGirls.isEmpty {
+                    loadGirlsFromFirebase()
+                }
+            }
+
         case .tournament:
             TournamentView(onExit: {
                 withAnimation { currentScreen = .home }
             })
+
         case .leaderboard:
             LeaderboardView(onBack: {
                 withAnimation { currentScreen = .home }
             })
+        }
+    }
+
+    private func loadGirlsFromFirebase() {
+        FirebaseGirlService().fetchGirls { girls in
+            DispatchQueue.main.async {
+                for girl in girls {
+                    context.insert(girl)
+                }
+                try? context.save()
+            }
         }
     }
 }

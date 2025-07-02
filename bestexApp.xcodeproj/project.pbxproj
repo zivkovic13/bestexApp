@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		521E311C2E15CEB10018140F /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 521E311B2E15CEB10018140F /* FirebaseAI */; };
+		521E311E2E15CEB10018140F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 521E311D2E15CEB10018140F /* FirebaseAuth */; };
+		521E31202E15CEB10018140F /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 521E311F2E15CEB10018140F /* FirebaseCore */; };
+		521E31222E15CEB10018140F /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 521E31212E15CEB10018140F /* FirebaseDatabase */; };
+		521E31242E15CEB10018140F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 521E31232E15CEB10018140F /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		52A67C542E12B07E0094E832 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +60,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				521E311C2E15CEB10018140F /* FirebaseAI in Frameworks */,
+				521E31202E15CEB10018140F /* FirebaseCore in Frameworks */,
+				521E31222E15CEB10018140F /* FirebaseDatabase in Frameworks */,
+				521E31242E15CEB10018140F /* FirebaseStorage in Frameworks */,
+				521E311E2E15CEB10018140F /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +125,11 @@
 			);
 			name = bestexApp;
 			packageProductDependencies = (
+				521E311B2E15CEB10018140F /* FirebaseAI */,
+				521E311D2E15CEB10018140F /* FirebaseAuth */,
+				521E311F2E15CEB10018140F /* FirebaseCore */,
+				521E31212E15CEB10018140F /* FirebaseDatabase */,
+				521E31232E15CEB10018140F /* FirebaseStorage */,
 			);
 			productName = bestexApp;
 			productReference = 52A67C442E12B07C0094E832 /* bestexApp.app */;
@@ -195,6 +213,9 @@
 			);
 			mainGroup = 52A67C3B2E12B07C0094E832;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 52A67C452E12B07C0094E832 /* Products */;
 			projectDirPath = "";
@@ -550,6 +571,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		521E311B2E15CEB10018140F /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		521E311D2E15CEB10018140F /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		521E311F2E15CEB10018140F /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		521E31212E15CEB10018140F /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		521E31232E15CEB10018140F /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 521E311A2E15CEB10018140F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 52A67C3C2E12B07C0094E832 /* Project object */;
 }
