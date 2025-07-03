@@ -38,14 +38,35 @@ class Girl: Identifiable, Codable {
 
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
+        
+        // Decode id: accept either String or Int and convert Int to String
+        if let idString = try? container.decode(String.self, forKey: .id) {
+            id = idString
+        } else if let idInt = try? container.decode(Int.self, forKey: .id) {
+            id = String(idInt)
+        } else {
+            throw DecodingError.keyNotFound(CodingKeys.id, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "ID key not found"))
+        }
+        
         name = try container.decode(String.self, forKey: .name)
         yearBorn = try container.decode(Int.self, forKey: .yearBorn)
         city = try container.decode(String.self, forKey: .city)
         wins = try container.decode(Int.self, forKey: .wins)
-        imageUrls = try container.decode([String].self, forKey: .imageUrls)
+        imageUrls = try container.decodeIfPresent([String].self, forKey: .imageUrls) ?? []
         currentRound = try container.decodeIfPresent(Int.self, forKey: .currentRound) ?? 0
-        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+
+        // Decode isFavorite allowing Int 0/1 to Bool conversion
+        if container.contains(.isFavorite) {
+            if let boolVal = try? container.decode(Bool.self, forKey: .isFavorite) {
+                isFavorite = boolVal
+            } else if let intVal = try? container.decode(Int.self, forKey: .isFavorite) {
+                isFavorite = intVal != 0
+            } else {
+                isFavorite = false
+            }
+        } else {
+            isFavorite = false
+        }
     }
 
     func encode(to encoder: Encoder) throws {
