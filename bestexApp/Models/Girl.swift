@@ -9,8 +9,8 @@ class Girl: Identifiable, Codable {
     @Attribute var city: String
     @Attribute var wins: Int
     @Attribute var imageUrls: [String] = []
-    @Attribute var currentRound: Int = 0          // New: tracks current round
-    @Attribute var isFavorite: Bool = false       // New: favorite flag
+    @Attribute var currentRound: Int = 0
+    @Attribute var isFavorite: Bool = false
 
     init(
         id: String = UUID().uuidString,

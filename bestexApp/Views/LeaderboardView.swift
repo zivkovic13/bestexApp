@@ -40,11 +40,17 @@ struct LeaderboardView: View {
                 }
             }
 
-            Button("Izlaz") {
+            Button("Nazad na pocetni ekran") {
                 onBack()
             }
-            .foregroundColor(.red)
+            .font(.headline)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
             .padding()
+            .background(Color.purple)
+            .cornerRadius(15)
+            .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 40)  // << Add this line
         }
         .onAppear {
             loadLeaderboard()

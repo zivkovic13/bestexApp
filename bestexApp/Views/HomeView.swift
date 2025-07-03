@@ -42,10 +42,25 @@ struct HomeView: View {
                 Button(action: leaderboardAction) {
                     Text("Rang lista")
                         .font(.headline)
-                        .foregroundColor(.purple)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(.systemGray5))
+                        .background(Color.purple)
+                        .cornerRadius(15)
+                        .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
+                }
+                .padding(.horizontal, 40)
+
+                // New IZLAZ button
+                Button {
+                    exit(0)
+                } label: {
+                    Text("IZLAZ")
+                        .font(.headline)
+                        .foregroundColor(.white)      
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red)
                         .cornerRadius(15)
                 }
                 .padding(.horizontal, 40)

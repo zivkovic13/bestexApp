@@ -84,8 +84,14 @@ struct TournamentView: View {
                 Button("Nazad na pocetni ekran") {
                     onExit()
                 }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
                 .padding()
-                .foregroundColor(.red)
+                .background(Color.purple)
+                .cornerRadius(15)
+                .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
+                .padding(.horizontal, 40)  // << Add this line
             }
         }
         .navigationBarBackButtonHidden(true)
