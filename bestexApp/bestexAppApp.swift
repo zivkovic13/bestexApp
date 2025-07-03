@@ -1,12 +1,12 @@
 import SwiftUI
 import SwiftData
-import FirebaseCore  // ✅ Add this import
+import FirebaseCore
 
 @main
 struct bestexAppApp: App {
     // Initialize Firebase
     init() {
-        FirebaseApp.configure()  // ✅ Configure Firebase at app launch
+        FirebaseApp.configure()
     }
 
     // SwiftData model container setup (no change)

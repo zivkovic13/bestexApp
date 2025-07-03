@@ -104,7 +104,7 @@ struct TournamentView: View {
     func loadGirlsFromFirebase() {
         firebaseService.fetchGirls { fetchedGirls in
             DispatchQueue.main.async {
-                var updatedGirls = fetchedGirls
+                let updatedGirls = fetchedGirls
 
                 // Assign rounds: favorites start at round64 (2), others at qualifying (0)
                 for i in 0..<updatedGirls.count {
@@ -120,15 +120,19 @@ struct TournamentView: View {
     }
 
     func pickWinner(girl: Girl) {
-        print("Pobednik: \(girl.name) u rundi \(roundType.rawValue)")
+        print("Prolaz dalje: \(girl.name) u rundi \(roundType.rawValue)")
         winners.append(girl)
 
         remainingGirls -= 1
         currentMatchIndex += 1
 
         if currentMatchIndex * 2 >= girlsInRound.count {
-            print("Round \(roundType.rawValue) finished with \(winners.count) winners.")
             showNextRoundButton = true
+            
+            if roundType.nextRound == nil {
+                // Final round just finished - finalize tournament
+                finalizeTournament()
+            }
         }
     }
 
@@ -147,6 +151,7 @@ struct TournamentView: View {
                     girls[index].currentRound = -1 // eliminated
                 }
             }
+
             resetRound(nextRound)
         }
     }
@@ -211,5 +216,25 @@ struct TournamentView: View {
         winners.removeAll()
         currentMatchIndex = 0
         showNextRoundButton = false
+    }
+    
+    private func finalizeTournament() {
+        guard let finalWinner = winners.first else {
+            print("No final winner found.")
+            return
+        }
+        print("🏆 Pobednik takmicenja: \(finalWinner.name)")
+
+        if let index = girls.firstIndex(where: { $0.id == finalWinner.id }) {
+            girls[index].wins += 1
+
+            firebaseService.updateGirl(girls[index]) { success in
+                if success {
+                    print("✅ Updated wins for winner \(finalWinner.name)")
+                } else {
+                    print("❌ Failed to update winner \(finalWinner.name)")
+                }
+            }
+        }
     }
 }

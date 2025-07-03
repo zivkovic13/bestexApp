@@ -46,4 +46,29 @@ class FirebaseGirlService {
             completion(result)
         }
     }
+    
+    func updateGirl(_ girl: Girl, completion: @escaping (Bool) -> Void) {
+        let girlRef = databaseRef.child(girl.id)
+
+        let data: [String: Any] = [
+            "name": girl.name,
+            "yearBorn": girl.yearBorn,
+            "city": girl.city,
+            "wins": girl.wins,
+            "imageUrls": girl.imageUrls,
+            "currentRound": girl.currentRound,
+            "isFavorite": girl.isFavorite
+        ]
+
+        girlRef.updateChildValues(data) { error, _ in
+            if let error = error {
+                print("Failed to update girl \(girl.id): \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("Successfully updated girl \(girl.name)")
+                completion(true)
+            }
+        }
+    }
+
 }

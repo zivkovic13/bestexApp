@@ -23,7 +23,7 @@ struct GirlCardView: View {
 
             Text("\(girl.name)")
                 .font(.headline)
-            Text("Godine: \(girl.yearBorn)")
+            Text("Gdodiste: \(girl.yearBorn)")
                 .font(.subheadline)
             Text("Mesto: \(girl.city)")
                 .font(.subheadline)
