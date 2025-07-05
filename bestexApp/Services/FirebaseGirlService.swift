@@ -29,7 +29,7 @@ class FirebaseGirlService {
                 // Each 'child' should be one girl node
                 if let dict = child.value as? [String: Any] {
                     var mutableDict = dict
-                    mutableDict["id"] = child.key // Assign Firebase key as id
+                    mutableDict["id"] = child.key
                     
                     if let jsonData = try? JSONSerialization.data(withJSONObject: mutableDict),
                        let girl = try? JSONDecoder().decode(Girl.self, from: jsonData) {

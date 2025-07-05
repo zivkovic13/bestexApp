@@ -146,14 +146,15 @@
                     if validCityFolders.contains(girl.city) {
                         folderPrefix = "\(encodedCity)/\(encodedName)"
                     } else {
-                        folderPrefix = "Ostalo/\(encodedCity)/\(encodedName)"
+                        folderPrefix = "/Ostalo/\(encodedCity)/\(encodedName)"
                     }
 
+                    print("Folder prefix: \(folderPrefix)")
 
                     self.imageUrls = fileNames.compactMap { fileName in
                         let encodedFileName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? fileName
                         let fullURLString = "\(baseImageURL)/\(folderPrefix)/\(encodedFileName)"
-                        print("🔗 Final image URL: \(fullURLString)")
+//                        print("🔗 Final image URL: \(fullURLString)")
                         return URL(string: fullURLString)
                     }
 

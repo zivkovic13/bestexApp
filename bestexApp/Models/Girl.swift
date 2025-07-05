@@ -11,6 +11,10 @@ class Girl: Identifiable, Codable {
     @Attribute var imageUrls: [String] = []
     @Attribute var currentRound: Int = 0
     @Attribute var isFavorite: Bool = false
+    
+    var hasImages: Bool {
+        !imageUrls.isEmpty
+    }
 
     init(
         id: String = UUID().uuidString,
