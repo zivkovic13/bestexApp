@@ -37,9 +37,22 @@
 		52A67C5D2E12B07E0094E832 /* bestexAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bestexAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		521E31332E16CC6C0018140F /* Exceptions for "bestexApp" folder in "bestexApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 52A67C432E12B07C0094E832 /* bestexApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		52A67C462E12B07C0094E832 /* bestexApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				521E31332E16CC6C0018140F /* Exceptions for "bestexApp" folder in "bestexApp" target */,
+			);
 			path = bestexApp;
 			sourceTree = "<group>";
 		};
@@ -416,8 +429,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DVHAXNMSH6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = bestexApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "MISS Zivkovic";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -443,8 +459,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DVHAXNMSH6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = bestexApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "MISS Zivkovic";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

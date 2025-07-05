@@ -27,6 +27,46 @@ struct TournamentView: View {
     }
 
     var totalGirlsInRound: Int { girlsInRound.count }
+    
+    // MARK: - NEW: pairs for current round, avoiding favorites vs favorites until R16
+    var currentRoundPairs: [(Girl, Girl)] {
+        // Rounds where favorites can't face each other:
+        let restrictedRounds: [RoundType] = [.round64, .round32]
+        
+        if restrictedRounds.contains(roundType) {
+            let favs = girlsInRound.filter { $0.isFavorite }
+            let nonFavs = girlsInRound.filter { !$0.isFavorite }
+
+            var pairs: [(Girl, Girl)] = []
+
+            // Pair favorites with non-favorites first
+            let pairCount = min(favs.count, nonFavs.count)
+            for i in 0..<pairCount {
+                pairs.append((favs[i], nonFavs[i]))
+            }
+
+            // Pair leftover favorites among themselves (if any)
+            let leftoverFavs = Array(favs.dropFirst(pairCount))
+            for i in stride(from: 0, to: leftoverFavs.count - 1, by: 2) {
+                pairs.append((leftoverFavs[i], leftoverFavs[i + 1]))
+            }
+
+            // Pair leftover non-favorites among themselves (if any)
+            let leftoverNonFavs = Array(nonFavs.dropFirst(pairCount))
+            for i in stride(from: 0, to: leftoverNonFavs.count - 1, by: 2) {
+                pairs.append((leftoverNonFavs[i], leftoverNonFavs[i + 1]))
+            }
+
+            return pairs
+        } else {
+            // From round16 onward, normal pairing by sequence
+            var pairs: [(Girl, Girl)] = []
+            for i in stride(from: 0, to: girlsInRound.count - 1, by: 2) {
+                pairs.append((girlsInRound[i], girlsInRound[i + 1]))
+            }
+            return pairs
+        }
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -52,13 +92,14 @@ struct TournamentView: View {
                 }
                 .padding()
 
-                if currentMatchIndex * 2 + 1 < girlsInRound.count {
+                if currentMatchIndex < currentRoundPairs.count {
+                    let pair = currentRoundPairs[currentMatchIndex]
                     HStack(spacing: 20) {
-                        GirlCardView(girl: girlsInRound[currentMatchIndex * 2]) {
-                            pickWinner(girl: girlsInRound[currentMatchIndex * 2])
+                        GirlCardView(girl: pair.0) {
+                            pickWinner(girl: pair.0)
                         }
-                        GirlCardView(girl: girlsInRound[currentMatchIndex * 2 + 1]) {
-                            pickWinner(girl: girlsInRound[currentMatchIndex * 2 + 1])
+                        GirlCardView(girl: pair.1) {
+                            pickWinner(girl: pair.1)
                         }
                     }
                     .padding(.horizontal)
@@ -91,14 +132,14 @@ struct TournamentView: View {
                 .background(Color.purple)
                 .cornerRadius(15)
                 .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
-                .padding(.horizontal, 40)  // << Add this line
+                .padding(.horizontal, 40)
             }
         }
         .navigationBarBackButtonHidden(true)
         .alert(isPresented: $showLuckyLosersAlert) {
             Alert(
                 title: Text("Lucky losers:"),
-                message: Text(luckyLosers.map { $0.name }.joined(separator: ", ")),
+                message: Text(luckyLosers.map { $0.name }.joined(separator: ",\n ")),
                 dismissButton: .default(Text("OK"))
             )
         }
@@ -132,7 +173,7 @@ struct TournamentView: View {
         remainingGirls -= 1
         currentMatchIndex += 1
 
-        if currentMatchIndex * 2 >= girlsInRound.count {
+        if currentMatchIndex >= currentRoundPairs.count {
             showNextRoundButton = true
             
             if roundType.nextRound == nil {

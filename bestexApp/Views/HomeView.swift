@@ -19,7 +19,7 @@ struct HomeView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
 
-                Text("Pripremite se za izbor najlepse devojke u konkurenciji od 210+ takmicarki")
+                Text("Pripremite se za izbor najlepse devojke u konkurenciji od 215+ takmicarki")
                     .font(.body)
                     .foregroundColor(.purple)
                     .multilineTextAlignment(.center)

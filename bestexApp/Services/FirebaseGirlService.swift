@@ -70,5 +70,33 @@ class FirebaseGirlService {
             }
         }
     }
+    
+    func fetchImagesForGirl(city: String, name: String, completion: @escaping ([String]) -> Void) {
+            let baseURL = "https://mizitsolutions.com/list-images.php"
+            
+            guard let cityEncoded = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                  let nameEncoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+                print("❌ Failed to encode city or name")
+                completion([])
+                return
+            }
+
+            let urlString = "\(baseURL)?city=\(cityEncoded)&name=\(nameEncoded)"
+            guard let url = URL(string: urlString) else {
+                print("❌ Invalid URL: \(urlString)")
+                completion([])
+                return
+            }
+
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data,
+                   let imageNames = try? JSONDecoder().decode([String].self, from: data) {
+                    completion(imageNames)
+                } else {
+                    print("❌ Failed to load image list for \(name): \(error?.localizedDescription ?? "unknown error")")
+                    completion([])
+                }
+            }.resume()
+        }
 
 }
