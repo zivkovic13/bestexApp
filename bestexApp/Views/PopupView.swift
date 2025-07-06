@@ -1,11 +1,4 @@
-//
-//  PopupView.swift
-//  bestexApp
-//
-//  Created by MacBook Pro on 5. 7. 2025..
-//
 import SwiftUI
-
 
 struct PopupView: View {
     let title: String
@@ -13,38 +6,44 @@ struct PopupView: View {
     let onClose: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+            // TITLE
             Text(title)
-                .font(.headline)
-                .padding(.top)
+                .font(.title2.bold())
+                .foregroundColor(.purple)
+                .multilineTextAlignment(.center)
+                .padding(.top, 20)
 
+            // MESSAGE
             ScrollView {
                 Text(message)
                     .font(.body)
+                    .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
 
-            Button("Got it!") {
-                onClose()
+            // BUTTON
+            Button(action: onClose) {
+                Text("Got it!")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
             }
-            .font(.headline)
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(Color.purple)
-            .foregroundColor(.white)
-            .cornerRadius(10)
             .padding(.horizontal)
-
+            .padding(.bottom, 10)
         }
         .padding()
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(radius: 10)
-        .frame(maxWidth: 300)
+        .background(.ultraThinMaterial)
+        .cornerRadius(25)
+        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+        .frame(maxWidth: 340)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.purple, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(Color.purple.opacity(0.3), lineWidth: 1.5)
         )
     }
 }

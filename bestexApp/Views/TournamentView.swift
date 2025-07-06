@@ -12,6 +12,8 @@ struct TournamentView: View {
     @State private var showNextRoundButton = false
     @State private var luckyLosers: [Girl] = []
     @State private var showLuckyLosersAlert = false
+    @State private var showLuckyLosersPopup = false
+    @State private var roundPairs: [(Girl, Girl)] = []
 
     var onExit: () -> Void = {}
 
@@ -27,49 +29,6 @@ struct TournamentView: View {
     }
 
     var totalGirlsInRound: Int { girlsInRound.count }
-    
-    // pairs for current round, avoiding favorites vs favorites until R16
-    var currentRoundPairs: [(Girl, Girl)] {
-        
-//        let girlsThisRound: Int { girlsInRound.shuffled() }
-        
-        // Rounds where favorites can't face each other:
-        let restrictedRounds: [RoundType] = [.round64, .round32, .round16]
-        
-        if restrictedRounds.contains(roundType) {
-            let favs = girlsInRound.filter { $0.isFavorite }
-            let nonFavs = girlsInRound.filter { !$0.isFavorite }
-
-            var pairs: [(Girl, Girl)] = []
-
-            // Pair favorites with non-favorites first
-            let pairCount = min(favs.count, nonFavs.count)
-            for i in 0..<pairCount {
-                pairs.append((favs[i], nonFavs[i]))
-            }
-
-            // Pair leftover favorites among themselves (if any)
-            let leftoverFavs = Array(favs.dropFirst(pairCount))
-            for i in stride(from: 0, to: leftoverFavs.count - 1, by: 2) {
-                pairs.append((leftoverFavs[i], leftoverFavs[i + 1]))
-            }
-
-            // Pair leftover non-favorites among themselves (if any)
-            let leftoverNonFavs = Array(nonFavs.dropFirst(pairCount))
-            for i in stride(from: 0, to: leftoverNonFavs.count - 1, by: 2) {
-                pairs.append((leftoverNonFavs[i], leftoverNonFavs[i + 1]))
-            }
-
-            return pairs
-        } else {
-            // From round8 onward, normal pairing by sequence
-            var pairs: [(Girl, Girl)] = []
-            for i in stride(from: 0, to: girlsInRound.count - 1, by: 2) {
-                pairs.append((girlsInRound[i], girlsInRound[i + 1]))
-            }
-            return pairs
-        }
-    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -95,9 +54,9 @@ struct TournamentView: View {
                 }
                 .padding()
 
-                if currentMatchIndex < currentRoundPairs.count {
-                    let pair = currentRoundPairs[currentMatchIndex]
-                    HStack(spacing: 20) {
+                if currentMatchIndex < roundPairs.count {
+                    let pair = roundPairs[currentMatchIndex]
+                    VStack(spacing: 12) {
                         GirlCardView(girl: pair.0) {
                             pickWinner(girl: pair.0)
                         }
@@ -108,8 +67,12 @@ struct TournamentView: View {
                         }
                         .id(pair.1.id)
                     }
-                    .padding(.horizontal)
-                } else {
+
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 30)
+                }
+
+                    else {
                     Text("Runda završena!")
                         .font(.title)
                         .padding()
@@ -148,7 +111,7 @@ struct TournamentView: View {
                 message: Text(luckyLosers.map { $0.name }.joined(separator: ",\n ")),
                 dismissButton: .default(Text("OK"))
             )
-        }
+        }   
         .onAppear {
             loadGirlsFromFirebase()
         }
@@ -157,33 +120,60 @@ struct TournamentView: View {
     func loadGirlsFromFirebase() {
         firebaseService.fetchGirls { fetchedGirls in
             DispatchQueue.main.async {
-                let updatedGirls = fetchedGirls
-
-                // Assign rounds: favorites start at round64 (2), others at qualifying (0)
-                for i in 0..<updatedGirls.count {
-                    updatedGirls[i].currentRound = updatedGirls[i].isFavorite ? RoundType.round128.roundNumber : RoundType.qualifying.roundNumber
+                for i in 0..<fetchedGirls.count {
+                    fetchedGirls[i].currentRound = fetchedGirls[i].isFavorite ? RoundType.round128.roundNumber : RoundType.qualifying.roundNumber
                 }
 
-                self.girls = updatedGirls
-                self.remainingGirls = updatedGirls.count
-                print("Loaded \(updatedGirls.count) girls. Assigned rounds: favorites to round64, others qualifying.")
+                self.girls = fetchedGirls
+                self.remainingGirls = fetchedGirls.count
+                self.roundPairs = generateCurrentRoundPairs()
                 self.isLoading = false
             }
         }
     }
 
+    func generateCurrentRoundPairs() -> [(Girl, Girl)] {
+        let girlsShuffled = girlsInRound.shuffled()
+        var girlsWithImages = girlsShuffled.filter { !$0.imageUrls.isEmpty }
+        var girlsWithoutImages = girlsShuffled.filter { $0.imageUrls.isEmpty }
+
+        var pairs: [(Girl, Girl)] = []
+
+        while !girlsWithoutImages.isEmpty && !girlsWithImages.isEmpty {
+            let girlNoImage = girlsWithoutImages.removeFirst()
+            let girlWithImage = girlsWithImages.removeFirst()
+            pairs.append((girlWithImage, girlNoImage))
+        }
+
+        girlsWithImages.shuffle()
+        for i in stride(from: 0, to: girlsWithImages.count - 1, by: 2) {
+            pairs.append((girlsWithImages[i], girlsWithImages[i + 1]))
+        }
+
+        girlsWithoutImages.shuffle()
+        for i in stride(from: 0, to: girlsWithoutImages.count - 1, by: 2) {
+            pairs.append((girlsWithoutImages[i], girlsWithoutImages[i + 1]))
+        }
+
+        return pairs
+    }
+
     func pickWinner(girl: Girl) {
+        guard !winners.contains(where: { $0.id == girl.id }) else {
+            print("⚠️ \(girl.name) already selected as winner. Ignored.")
+            return
+        }
+
         print("Prolaz dalje: \(girl.name) u rundi \(roundType.rawValue)")
         winners.append(girl)
 
         remainingGirls -= 1
         currentMatchIndex += 1
 
-        if currentMatchIndex >= currentRoundPairs.count {
+        if currentMatchIndex >= roundPairs.count {
             showNextRoundButton = true
-            
+
             if roundType.nextRound == nil {
-                // Final round just finished - finalize tournament
                 finalizeTournament()
             }
         }
@@ -196,12 +186,11 @@ struct TournamentView: View {
         case .qualifying:
             advanceQualifyingWinners()
         default:
-            // For rounds after qualifying (round64, 32, etc.)
             for index in girls.indices {
                 if winners.contains(where: { $0.id == girls[index].id }) {
                     girls[index].currentRound = nextRound.roundNumber
                 } else if girls[index].currentRound == roundType.roundNumber {
-                    girls[index].currentRound = -1 // eliminated
+                    girls[index].currentRound = -1
                 }
             }
 
@@ -210,13 +199,21 @@ struct TournamentView: View {
     }
 
     private func advanceQualifyingWinners() {
+        print("Advancing from QUALIFYING to ROUND128")
+        
         let qualifyingGirls = girls.filter { $0.currentRound == RoundType.qualifying.roundNumber }
         let totalFavorites = girls.filter { $0.isFavorite }.count
-        let round128Target = 128 - totalFavorites  // total needed to fill round64
-
+        let round128Target = 128 - totalFavorites
+        
+        print("Total favorites already in round128: \(totalFavorites)")
+        
+        // Debug print the winners list and count before any processing
+        print("Winners count before promotion: \(winners.count)")
+        print("Winners: \(winners.map { $0.name })")
+        
         let winnersCount = winners.count
-
-        // Odd/Unpaired girl handling - code block for when number of girls is ODD ie 215
+        
+        // Handle odd number of qualifying girls for lucky loser
         var oddLuckyLoser: Girl? = nil
         if qualifyingGirls.count % 2 != 0 {
             let nonWinnersInQualifying = qualifyingGirls.filter { girl in
@@ -224,27 +221,29 @@ struct TournamentView: View {
             }
             if let oddGirl = nonWinnersInQualifying.last {
                 oddLuckyLoser = oddGirl
-                print("\nOdd girl (unpaired) automatically lucky loser: \(oddGirl.name)\n")
+                print("Odd unpaired lucky loser candidate: \(oddGirl.name)")
             }
         }
-
-        // Lucky losers needed (excluding unpaired one)
+        
         let luckyLosersNeeded = max(0, round128Target - winnersCount - (oddLuckyLoser == nil ? 0 : 1))
-        print("Qualifying winners: \(winnersCount), lucky losers needed (excluding odd one): \(luckyLosersNeeded)")
-
-        // Random lucky losers from non-winners excluding oddLuckyLoser
+        print("Lucky losers needed (excluding odd one): \(luckyLosersNeeded)")
+        
         let nonWinnersInQualifying = qualifyingGirls.filter { girl in
             !winners.contains(where: { $0.id == girl.id }) && girl.id != oddLuckyLoser?.id
         }
+        
+        print("Non-winners available for lucky losers: \(nonWinnersInQualifying.count)")
+        
         let randomLuckyLosers = Array(nonWinnersInQualifying.shuffled().prefix(luckyLosersNeeded))
-
-        // Combine oddLuckyLoser + random lucky losers
+        
         luckyLosers = randomLuckyLosers
         if let odd = oddLuckyLoser {
             luckyLosers.append(odd)
         }
-
-        // Update rounds for winners and lucky losers directly to round128
+        
+        print("Lucky losers selected: \(luckyLosers.map { $0.name })")
+        
+        // Update girls' currentRound accordingly
         for index in girls.indices {
             let girl = girls[index]
             if winners.contains(where: { $0.id == girl.id }) || luckyLosers.contains(where: { $0.id == girl.id }) {
@@ -253,34 +252,36 @@ struct TournamentView: View {
                 girls[index].currentRound = -1 // eliminated
             }
         }
-
-        // Update remainingGirls accordingly
-        remainingGirls = totalFavorites + winnersCount + luckyLosers.count
-
-        resetRound(.round128)
-
-        // Show lucky losers alert
+        
+        let totalAdvanced = girls.filter { $0.currentRound == RoundType.round128.roundNumber }.count
+        print("Total girls promoted to round128: \(totalAdvanced) (should be 128)")
+        
+        remainingGirls = totalAdvanced
+        
         showLuckyLosersAlert = !luckyLosers.isEmpty
-        print("Lucky losers advancing: \(luckyLosers.map { $0.name }.joined(separator: ", "))")
+        
+        resetRound(.round128)
     }
+
 
     private func resetRound(_ nextRound: RoundType) {
         roundType = nextRound
         winners.removeAll()
         currentMatchIndex = 0
         showNextRoundButton = false
+        roundPairs = generateCurrentRoundPairs()
     }
-    
+
     private func finalizeTournament() {
         guard let finalWinner = winners.first else {
             print("No final winner found.")
             return
         }
+
         print("🏆 Pobednik takmicenja: \(finalWinner.name)")
 
         if let index = girls.firstIndex(where: { $0.id == finalWinner.id }) {
             girls[index].wins += 1
-
             firebaseService.updateGirl(girls[index]) { success in
                 if success {
                     print("✅ Updated wins for winner \(finalWinner.name)")
