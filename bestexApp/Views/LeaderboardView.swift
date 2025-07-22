@@ -1,10 +1,3 @@
-//
-//  LeaderboardView.swift
-//  bestexApp
-//
-//  Created by MacBook Pro on 3. 7. 2025..
-//
-
 import SwiftUI
 
 struct LeaderboardView: View {
@@ -15,15 +8,26 @@ struct LeaderboardView: View {
 
     var onBack: () -> Void = {}
 
+    // Define your primary colors and gradient here for consistency
+    let primaryColors = [
+        Color(#colorLiteral(red: 0.239, green: 0.674, blue: 0.969, alpha: 1)),
+        Color(#colorLiteral(red: 0.259, green: 0.757, blue: 0.969, alpha: 1))
+    ]
+    var primaryGradient: LinearGradient {
+        LinearGradient(colors: primaryColors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Rang lista")
                 .font(.largeTitle)
-                .bold()
-                .padding()
+                .fontWeight(.bold)
+                .foregroundColor(primaryColors.first ?? .purple)
+                .padding(.bottom)
 
             if isLoading {
                 ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: primaryColors.first ?? .purple))
             } else {
                 List(girls.prefix(5)) { girl in
                     HStack {
@@ -38,19 +42,17 @@ struct LeaderboardView: View {
                     }
                     .padding(.vertical, 8)
                 }
+                .listStyle(PlainListStyle())
             }
 
-            Button("Nazad na pocetni ekran") {
-                onBack()
-            }
-            .font(.headline)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.purple)
-            .cornerRadius(15)
-            .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
-            .padding(.horizontal, 40)  // << Add this line
+            ModernButton(
+                label: "Nazad na početni ekran",
+                gradient: primaryGradient,
+                shadowColor: primaryColors.first ?? .purple,
+                action: onBack
+            )
+            .padding(.horizontal, 40)
+            .padding(.bottom, 20)
         }
         .onAppear {
             loadLeaderboard()
@@ -60,8 +62,7 @@ struct LeaderboardView: View {
     func loadLeaderboard() {
         firebaseService.fetchGirls { fetchedGirls in
             DispatchQueue.main.async {
-                // Sort girls by wins descending before assigning
-                self.girls = fetchedGirls.sorted(by: { $0.wins > $1.wins })
+                self.girls = fetchedGirls.sorted { $0.wins > $1.wins }
                 self.isLoading = false
             }
         }

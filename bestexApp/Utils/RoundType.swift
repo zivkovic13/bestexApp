@@ -32,15 +32,16 @@ enum RoundType: String, CaseIterable {
     }
 
     var color: Color {
+        let blueColor = Color(#colorLiteral(red: 0.239, green: 0.674, blue: 0.969, alpha: 1))
         switch self {
-        case .qualifying: return .purple
-        case .round128: return .purple
-        case .round64: return .purple
-        case .round32: return .purple
-        case .round16: return .purple
-        case .quarterFinal: return .green
-        case .semiFinal: return .blue
-        case .final: return .red
+        case .qualifying, .round128, .round64, .round32, .round16:
+            return blueColor
+        case .quarterFinal:
+            return .green
+        case .semiFinal:
+            return .blue
+        case .final:
+            return .red
         }
     }
 }

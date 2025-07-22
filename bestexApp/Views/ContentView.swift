@@ -3,7 +3,7 @@ import SwiftData
 
 struct ContentView: View {
     enum Screen {
-        case home, tournament, leaderboard
+        case home, tournament, leaderboard, pravilnik
     }
 
     @State private var currentScreen: Screen = .home
@@ -20,6 +20,9 @@ struct ContentView: View {
                 },
                 leaderboardAction: {
                     withAnimation { currentScreen = .leaderboard }
+                },
+                pravilnikAction: {
+                    withAnimation { currentScreen = .pravilnik }
                 }
             )
             .onAppear {
@@ -35,6 +38,11 @@ struct ContentView: View {
 
         case .leaderboard:
             LeaderboardView(onBack: {
+                withAnimation { currentScreen = .home }
+            })
+            
+        case .pravilnik:
+            PravilnikView(onBack: {
                 withAnimation { currentScreen = .home }
             })
         }

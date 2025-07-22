@@ -11,13 +11,29 @@ struct TournamentView: View {
     @State private var isLoading = true
     @State private var showNextRoundButton = false
     @State private var luckyLosers: [Girl] = []
-    @State private var showLuckyLosersAlert = false
     @State private var showLuckyLosersPopup = false
     @State private var roundPairs: [(Girl, Girl)] = []
 
     var onExit: () -> Void = {}
 
     private let firebaseService = FirebaseGirlService()
+
+    // Define your primary and exit colors for button gradients
+    let primaryColors = [
+        Color(#colorLiteral(red: 0.239, green: 0.674, blue: 0.969, alpha: 1)),
+        Color(#colorLiteral(red: 0.259, green: 0.757, blue: 0.969, alpha: 1))
+    ]
+    let exitColors = [
+        Color(#colorLiteral(red: 0.808, green: 0.027, blue: 0.333, alpha: 1)),
+        Color(#colorLiteral(red: 0.936, green: 0, blue: 0, alpha: 1))
+    ]
+
+    var primaryGradient: LinearGradient {
+        LinearGradient(colors: primaryColors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+    var exitGradient: LinearGradient {
+        LinearGradient(colors: exitColors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
 
     init(roundType: RoundType = .qualifying, onExit: @escaping () -> Void = {}) {
         self._roundType = State(initialValue: roundType)
@@ -31,91 +47,103 @@ struct TournamentView: View {
     var totalGirlsInRound: Int { girlsInRound.count }
 
     var body: some View {
-        VStack(spacing: 20) {
-            if isLoading {
-                ProgressView("Učitavanje...")
-                    .font(.title)
-                    .padding()
-                Spacer()
-            } else {
-                VStack {
-                    Text(roundType.rawValue)
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(roundType.color)
-                        .padding()
-
-                    HStack(spacing: 40) {
-                        Text("Ukupno devojaka u ovoj rundi: \(totalGirlsInRound)")
-                        Text("Preostalo devojaka na turniru: \(remainingGirls)")
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                }
-                .padding()
-
-                if currentMatchIndex < roundPairs.count {
-                    let pair = roundPairs[currentMatchIndex]
-                    VStack(spacing: 12) {
-                        GirlCardView(girl: pair.0) {
-                            pickWinner(girl: pair.0)
-                        }
-                        .id(pair.0.id)
-
-                        GirlCardView(girl: pair.1) {
-                            pickWinner(girl: pair.1)
-                        }
-                        .id(pair.1.id)
-                    }
-
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 30)
-                }
-
-                    else {
-                    Text("Runda završena!")
+        ZStack {
+            AnimatedBackground()
+            VStack(spacing: 20) {
+                if isLoading {
+                    ProgressView("Učitavanje...")
                         .font(.title)
                         .padding()
-
-                    if let next = roundType.nextRound {
-                        Button("Nastavi na \(next.rawValue)") {
-                            proceedToNextRound(next)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    } else {
-                        Text("Turnir je završen!")
+                    Spacer()
+                } else {
+                    VStack {
+                        Text(roundType.rawValue)
                             .font(.largeTitle)
-                            .foregroundColor(.green)
+                            .bold()
+                            .foregroundColor(roundType.color)
+                            .padding()
+
+                        HStack(spacing: 40) {
+                            Text("Ukupno devojaka u ovoj rundi: \(totalGirlsInRound)")
+                            Text("Preostalo devojaka na turniru: \(remainingGirls)")
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                     }
-                }
+                    .padding()
 
-                Spacer()
+                    if currentMatchIndex < roundPairs.count {
+                        let pair = roundPairs[currentMatchIndex]
+                        VStack(spacing: 12) {
+                            GirlCardView(girl: pair.0) {
+                                pickWinner(girl: pair.0)
+                            }
+                            .id(pair.0.id)
 
-                Button("Nazad na pocetni ekran") {
-                    onExit()
+                            GirlCardView(girl: pair.1) {
+                                pickWinner(girl: pair.1)
+                            }
+                            .id(pair.1.id)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 30)
+                    } else {
+                        Text("Runda završena!")
+                            .font(.title)
+                            .padding()
+
+                        if let next = roundType.nextRound {
+                            Button("Nastavi na \(next.rawValue)") {
+                                proceedToNextRound(next)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        } else {
+                            Text("Turnir je završen!")
+                                .font(.largeTitle)
+                                .foregroundColor(.green)
+                        }
+                    }
+
+                    Spacer()
+
+                    ModernButton(
+                        label: "Nazad na početni ekran",
+                        gradient: primaryGradient,
+                        shadowColor: primaryColors.first ?? .purple,
+                        action: onExit
+                    )
+                    .padding(.horizontal, 40)
+                    .offset(x: 8)  // <-- move the button 15 points right to look more centered
                 }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.purple)
-                .cornerRadius(15)
-                .shadow(color: Color.purple.opacity(0.6), radius: 10, x: 0, y: 5)
-                .padding(.horizontal, 40)
+            }
+
+            // Custom popup overlay
+            if showLuckyLosersPopup {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .zIndex(1)
+
+                PopupView(
+                    title: "Lucky Losers 🎲",
+                    message: luckyLosers.map { $0.name }.joined(separator: "\n"),
+                    onClose: {
+                        withAnimation {
+                            showLuckyLosersPopup = false
+                        }
+                        resetRound(.round128)
+                    }
+                )
+                .transition(.scale)
+                .zIndex(2)
             }
         }
         .navigationBarBackButtonHidden(true)
-        .alert(isPresented: $showLuckyLosersAlert) {
-            Alert(
-                title: Text("Lucky losers:"),
-                message: Text(luckyLosers.map { $0.name }.joined(separator: ",\n ")),
-                dismissButton: .default(Text("OK"))
-            )
-        }   
         .onAppear {
             loadGirlsFromFirebase()
         }
     }
+
+    // ... your existing functions below, unchanged ...
 
     func loadGirlsFromFirebase() {
         firebaseService.fetchGirls { fetchedGirls in
@@ -200,69 +228,52 @@ struct TournamentView: View {
 
     private func advanceQualifyingWinners() {
         print("Advancing from QUALIFYING to ROUND128")
-        
+
         let qualifyingGirls = girls.filter { $0.currentRound == RoundType.qualifying.roundNumber }
         let totalFavorites = girls.filter { $0.isFavorite }.count
         let round128Target = 128 - totalFavorites
-        
-        print("Total favorites already in round128: \(totalFavorites)")
-        
-        // Debug print the winners list and count before any processing
-        print("Winners count before promotion: \(winners.count)")
-        print("Winners: \(winners.map { $0.name })")
-        
         let winnersCount = winners.count
-        
-        // Handle odd number of qualifying girls for lucky loser
+
         var oddLuckyLoser: Girl? = nil
         if qualifyingGirls.count % 2 != 0 {
-            let nonWinnersInQualifying = qualifyingGirls.filter { girl in
+            let nonWinners = qualifyingGirls.filter { girl in
                 !winners.contains(where: { $0.id == girl.id })
             }
-            if let oddGirl = nonWinnersInQualifying.last {
-                oddLuckyLoser = oddGirl
-                print("Odd unpaired lucky loser candidate: \(oddGirl.name)")
-            }
+            oddLuckyLoser = nonWinners.last
         }
-        
+
         let luckyLosersNeeded = max(0, round128Target - winnersCount - (oddLuckyLoser == nil ? 0 : 1))
-        print("Lucky losers needed (excluding odd one): \(luckyLosersNeeded)")
-        
-        let nonWinnersInQualifying = qualifyingGirls.filter { girl in
+
+        let nonWinners = qualifyingGirls.filter { girl in
             !winners.contains(where: { $0.id == girl.id }) && girl.id != oddLuckyLoser?.id
         }
-        
-        print("Non-winners available for lucky losers: \(nonWinnersInQualifying.count)")
-        
-        let randomLuckyLosers = Array(nonWinnersInQualifying.shuffled().prefix(luckyLosersNeeded))
-        
-        luckyLosers = randomLuckyLosers
+
+        let selectedLuckyLosers = Array(nonWinners.shuffled().prefix(luckyLosersNeeded))
+
+        luckyLosers = selectedLuckyLosers
         if let odd = oddLuckyLoser {
             luckyLosers.append(odd)
         }
-        
-        print("Lucky losers selected: \(luckyLosers.map { $0.name })")
-        
-        // Update girls' currentRound accordingly
+
         for index in girls.indices {
             let girl = girls[index]
             if winners.contains(where: { $0.id == girl.id }) || luckyLosers.contains(where: { $0.id == girl.id }) {
                 girls[index].currentRound = RoundType.round128.roundNumber
             } else if girl.currentRound == RoundType.qualifying.roundNumber {
-                girls[index].currentRound = -1 // eliminated
+                girls[index].currentRound = -1
             }
         }
-        
-        let totalAdvanced = girls.filter { $0.currentRound == RoundType.round128.roundNumber }.count
-        print("Total girls promoted to round128: \(totalAdvanced) (should be 128)")
-        
-        remainingGirls = totalAdvanced
-        
-        showLuckyLosersAlert = !luckyLosers.isEmpty
-        
-        resetRound(.round128)
-    }
 
+        remainingGirls = girls.filter { $0.currentRound == RoundType.round128.roundNumber }.count
+
+        if !luckyLosers.isEmpty {
+            withAnimation {
+                showLuckyLosersPopup = true
+            }
+        } else {
+            resetRound(.round128)
+        }
+    }
 
     private func resetRound(_ nextRound: RoundType) {
         roundType = nextRound
@@ -284,9 +295,9 @@ struct TournamentView: View {
             girls[index].wins += 1
             firebaseService.updateGirl(girls[index]) { success in
                 if success {
-                    print("✅ Updated wins for winner \(finalWinner.name)")
+                    print("Updated wins for winner \(finalWinner.name)")
                 } else {
-                    print("❌ Failed to update winner \(finalWinner.name)")
+                    print("Failed to update winner \(finalWinner.name)")
                 }
             }
         }

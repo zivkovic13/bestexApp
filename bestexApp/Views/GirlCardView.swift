@@ -81,7 +81,7 @@ struct GirlCardView: View {
                     Text(nameLines.last)
                         .font(.title3)
                         .bold()
-                    Text("Godište: \(girl.yearBorn)")
+                    Text("Godište: \(String(girl.yearBorn))")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     Text("Mesto: \(girl.city)")

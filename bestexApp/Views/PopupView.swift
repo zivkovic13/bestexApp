@@ -25,7 +25,7 @@ struct PopupView: View {
 
             // BUTTON
             Button(action: onClose) {
-                Text("Got it!")
+                Text("OK")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
