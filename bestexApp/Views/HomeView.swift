@@ -34,7 +34,7 @@ struct HomeView: View {
                         .shadow(color: Color.black.opacity(0.3), radius: 6, x: 2, y: 2)
                         .padding(.horizontal, 40)
 
-                    Text("Pripremite se za odabir najlepše devojke u konkurenciji od 215+ takmičarki 💃\nPre početka igre pročitaj pravilnik 📖")
+                    Text("Pripremite se za odabir najlepše devojke u konkurenciji od 220+ takmičarki 💃\nPre početka igre pročitaj pravilnik 📖")
                         .font(.system(size: 20, weight: .medium, design: .rounded))
                         .foregroundColor(Color.white.opacity(0.85))
                         .multilineTextAlignment(.center)
